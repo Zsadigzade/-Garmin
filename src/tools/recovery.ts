@@ -1,0 +1,263 @@
+import type { SleepData } from "garmin-connect/dist/garmin/types/sleep.js";
+import { appConfig } from "../config.js";
+import { withCache } from "../garmin/cache.js";
+import { withGarminClient } from "../garmin/client.js";
+import type { RecoveryStatusResult, RecoveryWeights, ToolTextResult } from "../garmin/types.js";
+import { clamp, formatIsoDate } from "../utils/helpers.js";
+
+// SECTION: Recovery Scoring
+
+const DEFAULT_WEIGHTS: RecoveryWeights = {
+  hrv: 0.3,
+  sleep: 0.3,
+  stress: 0.2,
+  restingHr: 0.2,
+};
+
+function normalizeWeights(weights?: Partial<RecoveryWeights>): RecoveryWeights {
+  const merged = { ...DEFAULT_WEIGHTS, ...weights };
+  const total = merged.hrv + merged.sleep + merged.stress + merged.restingHr;
+
+  if (total <= 0) {
+    return DEFAULT_WEIGHTS;
+  }
+
+  return {
+    hrv: merged.hrv / total,
+    sleep: merged.sleep / total,
+    stress: merged.stress / total,
+    restingHr: merged.restingHr / total,
+  };
+}
+
+function scoreFromHrv(hrv: number | null, status: string | null): number {
+  if (hrv === null) {
+    if (status === "BALANCED") {
+      return 80;
+    }
+    if (status === "LOW") {
+      return 45;
+    }
+    return 60;
+  }
+
+  if (hrv >= 60) {
+    return 95;
+  }
+  if (hrv >= 45) {
+    return 80;
+  }
+  if (hrv >= 30) {
+    return 60;
+  }
+  return 40;
+}
+
+function scoreFromSleep(score: number | null, durationSeconds: number): number {
+  if (score !== null) {
+    return clamp(score, 0, 100);
+  }
+
+  const hours = durationSeconds / 3600;
+  if (hours >= 8) {
+    return 90;
+  }
+  if (hours >= 7) {
+    return 75;
+  }
+  if (hours >= 6) {
+    return 55;
+  }
+  return 35;
+}
+
+function scoreFromStress(stress: number | null): number {
+  if (stress === null) {
+    return 60;
+  }
+
+  if (stress <= 15) {
+    return 95;
+  }
+  if (stress <= 25) {
+    return 75;
+  }
+  if (stress <= 35) {
+    return 55;
+  }
+  return 35;
+}
+
+function scoreFromRestingHr(restingHr: number | null, baseline: number | null): number {
+  if (restingHr === null) {
+    return 60;
+  }
+
+  if (baseline === null) {
+    if (restingHr <= 50) {
+      return 90;
+    }
+    if (restingHr <= 60) {
+      return 80;
+    }
+    if (restingHr <= 70) {
+      return 65;
+    }
+    return 45;
+  }
+
+  const delta = restingHr - baseline;
+  if (delta <= -2) {
+    return 90;
+  }
+  if (delta <= 2) {
+    return 75;
+  }
+  if (delta <= 5) {
+    return 55;
+  }
+  return 35;
+}
+
+function buildRecoveryStatus(
+  components: RecoveryStatusResult["components"],
+  weights: RecoveryWeights
+): RecoveryStatusResult {
+  const score = Math.round(
+    components.hrvScore * weights.hrv +
+      components.sleepScore * weights.sleep +
+      components.stressScore * weights.stress +
+      components.restingHrScore * weights.restingHr
+  );
+
+  let status: RecoveryStatusResult["status"] = "good";
+  let recommendation = "Moderate training is reasonable. Listen to your body during hard efforts.";
+
+  if (score >= 80) {
+    status = "recovered";
+    recommendation = "You look recovered. Hard training or a quality session is appropriate today.";
+  } else if (score < 60) {
+    status = "fatigued";
+    recommendation = "Recovery looks limited. Favor easy training, mobility, or a rest day.";
+  }
+
+  return {
+    score,
+    status,
+    recommendation,
+    components,
+  };
+}
+
+async function fetchRecoverySignals(): Promise<{
+  sleepData: SleepData;
+  restingHeartRate: number | null;
+  baselineRestingHeartRate: number | null;
+}> {
+  const today = new Date();
+
+  return withGarminClient(async (client) => {
+    const [sleepData, heartRate] = await Promise.all([
+      client.getSleepData(today),
+      client.getHeartRate(today),
+    ]);
+
+    const typedSleepData = sleepData as SleepData;
+    const typedHeartRate = heartRate as {
+      restingHeartRate?: number;
+      lastSevenDaysAvgRestingHeartRate?: number;
+    };
+
+    return {
+      sleepData: typedSleepData,
+      restingHeartRate: typedHeartRate.restingHeartRate ?? null,
+      baselineRestingHeartRate: typedHeartRate.lastSevenDaysAvgRestingHeartRate ?? null,
+    };
+  });
+}
+
+// SECTION: Tool Handler
+
+export async function getRecoveryStatus(input: {
+  hrv_weight?: number;
+  sleep_weight?: number;
+  stress_weight?: number;
+  resting_hr_weight?: number;
+}): Promise<ToolTextResult> {
+  const weights = normalizeWeights({
+    hrv: input.hrv_weight,
+    sleep: input.sleep_weight,
+    stress: input.stress_weight,
+    restingHr: input.resting_hr_weight,
+  });
+
+  const cacheKey = `get_recovery_status:${JSON.stringify(weights)}`;
+
+  const recovery = await withCache(cacheKey, appConfig.cacheTtlStats, async () => {
+    const signals = await fetchRecoverySignals();
+    const sleep = signals.sleepData.dailySleepDTO;
+
+    const components = {
+      hrvScore: scoreFromHrv(
+        signals.sleepData.avgOvernightHrv ?? null,
+        signals.sleepData.hrvStatus ?? null
+      ),
+      sleepScore: scoreFromSleep(
+        sleep?.sleepScores.overall?.value ?? null,
+        sleep?.sleepTimeSeconds ?? 0
+      ),
+      stressScore: scoreFromStress(sleep?.avgSleepStress ?? null),
+      restingHrScore: scoreFromRestingHr(
+        signals.restingHeartRate,
+        signals.baselineRestingHeartRate
+      ),
+    };
+
+    return buildRecoveryStatus(components, weights);
+  });
+
+  const text = [
+    `Recovery score: ${recovery.score}/100 (${recovery.status})`,
+    recovery.recommendation,
+    "",
+    "Component scores:",
+    `- HRV: ${recovery.components.hrvScore}`,
+    `- Sleep: ${recovery.components.sleepScore}`,
+    `- Stress: ${recovery.components.stressScore}`,
+    `- Resting HR: ${recovery.components.restingHrScore}`,
+    "",
+    `Date: ${formatIsoDate(new Date())}`,
+  ].join("\n");
+
+  return {
+    type: "text",
+    text,
+  };
+}
+
+export const recoveryToolDefinitions = [
+  {
+    name: "get_recovery_status",
+    description:
+      "Combines HRV, sleep, stress, and resting heart rate into a recovery score and training recommendation.",
+    inputSchema: {
+      hrv_weight: {
+        type: "number",
+        description: "Optional weight for HRV in the recovery score.",
+      },
+      sleep_weight: {
+        type: "number",
+        description: "Optional weight for sleep in the recovery score.",
+      },
+      stress_weight: {
+        type: "number",
+        description: "Optional weight for stress in the recovery score.",
+      },
+      resting_hr_weight: {
+        type: "number",
+        description: "Optional weight for resting heart rate in the recovery score.",
+      },
+    },
+    handler: getRecoveryStatus,
+  },
+];

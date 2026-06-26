@@ -1,0 +1,131 @@
+import { DateTime } from "luxon";
+
+export type TrendDirection = "improving" | "declining" | "stable" | "insufficient_data";
+
+export function parseIsoDate(value: string): Date {
+  const parsed = DateTime.fromISO(value, { zone: "utc" });
+  if (!parsed.isValid) {
+    throw new Error(`Invalid date "${value}". Use ISO 8601 format such as 2026-06-01.`);
+  }
+  return parsed.toJSDate();
+}
+
+export function formatIsoDate(date: Date): string {
+  return DateTime.fromJSDate(date, { zone: "utc" }).toISODate() ?? "";
+}
+
+export function getDateRange(days: number): Date[] {
+  const dates: Date[] = [];
+  const today = DateTime.utc().startOf("day");
+
+  for (let offset = 0; offset < days; offset += 1) {
+    dates.push(today.minus({ days: offset }).toJSDate());
+  }
+
+  return dates;
+}
+
+export function getDatesBetween(startDate: string, endDate: string): Date[] {
+  const start = DateTime.fromISO(startDate, { zone: "utc" }).startOf("day");
+  const end = DateTime.fromISO(endDate, { zone: "utc" }).startOf("day");
+
+  if (!start.isValid || !end.isValid) {
+    throw new Error("Invalid date range. Use ISO 8601 dates such as 2026-06-01.");
+  }
+
+  if (end < start) {
+    throw new Error("end_date must be on or after start_date.");
+  }
+
+  const dates: Date[] = [];
+  let cursor = start;
+
+  while (cursor <= end) {
+    dates.push(cursor.toJSDate());
+    cursor = cursor.plus({ days: 1 });
+  }
+
+  return dates;
+}
+
+export function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  }
+
+  if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  return `${remainingSeconds}s`;
+}
+
+export function formatDistanceMeters(meters: number): string {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(2)} km`;
+  }
+
+  return `${meters.toFixed(0)} m`;
+}
+
+export function formatPaceMetersPerSecond(metersPerSecond: number): string {
+  if (metersPerSecond <= 0) {
+    return "n/a";
+  }
+
+  const secondsPerKm = 1000 / metersPerSecond;
+  const minutes = Math.floor(secondsPerKm / 60);
+  const seconds = Math.round(secondsPerKm % 60);
+  return `${minutes}:${seconds.toString().padStart(2, "0")} /km`;
+}
+
+export function calculateTrend(values: number[], lowerIsBetter = false): TrendDirection {
+  const filtered = values.filter((value) => Number.isFinite(value));
+
+  if (filtered.length < 2) {
+    return "insufficient_data";
+  }
+
+  const midpoint = Math.floor(filtered.length / 2);
+  const recent = filtered.slice(0, midpoint);
+  const older = filtered.slice(midpoint);
+
+  if (recent.length === 0 || older.length === 0) {
+    return "insufficient_data";
+  }
+
+  const recentAverage = average(recent);
+  const olderAverage = average(older);
+  const delta = recentAverage - olderAverage;
+  const threshold = Math.max(Math.abs(olderAverage) * 0.02, 0.5);
+
+  if (Math.abs(delta) <= threshold) {
+    return "stable";
+  }
+
+  if (lowerIsBetter) {
+    return delta < 0 ? "improving" : "declining";
+  }
+
+  return delta > 0 ? "improving" : "declining";
+}
+
+export function average(values: number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+export function hashParams(params: Record<string, unknown>): string {
+  return JSON.stringify(params);
+}

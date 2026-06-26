@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.garmin/
+*.log
+coverage/
+.DS_Store
+*.tsbuildinfo

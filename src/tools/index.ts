@@ -1,0 +1,89 @@
+import { z } from "zod";
+import { activityToolDefinitions } from "./activities.js";
+import { bodyCompositionToolDefinitions } from "./bodyComposition.js";
+import { heartRateToolDefinitions } from "./heartRate.js";
+import { recoveryToolDefinitions } from "./recovery.js";
+import { sleepToolDefinitions } from "./sleep.js";
+import type { ToolTextResult } from "../garmin/types.js";
+import { parseIsoDate } from "../utils/helpers.js";
+
+// SECTION: Tool Registry
+
+type ToolHandler = (input: Record<string, unknown>) => Promise<ToolTextResult>;
+
+interface RegisteredTool {
+  name: string;
+  description: string;
+  inputSchema: Record<string, { type: string; description: string }>;
+  handler: ToolHandler;
+}
+
+export const toolRegistry: RegisteredTool[] = [
+  ...(activityToolDefinitions as unknown as RegisteredTool[]),
+  ...(sleepToolDefinitions as unknown as RegisteredTool[]),
+  ...(heartRateToolDefinitions as unknown as RegisteredTool[]),
+  ...(recoveryToolDefinitions as unknown as RegisteredTool[]),
+  ...(bodyCompositionToolDefinitions as unknown as RegisteredTool[]),
+];
+
+const toolHandlers = new Map<string, ToolHandler>(
+  toolRegistry.map((tool) => [tool.name, tool.handler as ToolHandler])
+);
+
+export function getToolByName(name: string): RegisteredTool | undefined {
+  return toolRegistry.find((tool) => tool.name === name);
+}
+
+export async function executeTool(
+  name: string,
+  args: Record<string, unknown> | undefined
+): Promise<ToolTextResult> {
+  const tool = getToolByName(name);
+
+  if (!tool) {
+    throw new Error(`Unknown tool: ${name}`);
+  }
+
+  const input = args ?? {};
+
+  if (name === "get_activities_range") {
+    const startDate = input.start_date;
+    const endDate = input.end_date;
+
+    if (typeof startDate !== "string" || typeof endDate !== "string") {
+      throw new Error("get_activities_range requires start_date and end_date (ISO 8601 strings).");
+    }
+
+    parseIsoDate(startDate);
+    parseIsoDate(endDate);
+  }
+
+  return tool.handler(input);
+}
+
+export const toolSchemas = {
+  get_latest_activity: z.object({}),
+  get_activities_range: z.object({
+    start_date: z.string().describe("Start date in ISO 8601 format"),
+    end_date: z.string().describe("End date in ISO 8601 format"),
+  }),
+  get_sleep_data: z.object({
+    nights: z.number().int().positive().optional(),
+  }),
+  get_heart_rate_trends: z.object({
+    days: z.number().int().positive().optional(),
+  }),
+  get_recovery_status: z.object({
+    hrv_weight: z.number().positive().optional(),
+    sleep_weight: z.number().positive().optional(),
+    stress_weight: z.number().positive().optional(),
+    resting_hr_weight: z.number().positive().optional(),
+  }),
+  get_body_composition: z.object({
+    days: z.number().int().positive().optional(),
+  }),
+};
+
+export function listRegisteredToolNames(): string[] {
+  return Array.from(toolHandlers.keys());
+}
