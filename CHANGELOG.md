@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.0] - 2026-06-26
 
 ### Fixed
 
@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - `.nvmrc` (Node 20)
 - `.github/workflows/publish.yml` for npm + GitHub Releases on version tags
 - Project knowledge base moved to Obsidian vault (`05-Projects/garmin-bud/`); see `docs/VAULT.md`
-- 11 new tests (22 total): cache key stability, date filtering, recovery scoring, error sanitization
+- 11 new tests (32 total): cache key stability, date filtering, recovery scoring, error sanitization
 
 ### Changed
 

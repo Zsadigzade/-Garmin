@@ -157,6 +157,9 @@ garmin-bud --version      # Print version
 | `CACHE_TTL_ACTIVITIES` | `1800` | Activity cache TTL (seconds) |
 | `CACHE_TTL_SLEEP` | `7200` | Sleep cache TTL (seconds) |
 | `CACHE_TTL_STATS` | `3600` | Stats cache TTL (seconds) |
+| `GARMIN_MCP_API_KEY` | auto-generated | Bearer token for HTTP MCP (`garmin-bud serve`) |
+| `GARMIN_MCP_HOST` | `127.0.0.1` | Bind host for HTTP server |
+| `GARMIN_MCP_PORT` | `3847` | Bind port for HTTP server |
 
 ## Security & privacy
 
@@ -182,7 +185,7 @@ garmin-bud --version      # Print version
 ```bash
 npm install
 npm run build
-npm test          # 25 tests via Node test runner
+npm test          # 32 tests via Node test runner
 npm run lint
 npm run dev       # Start with auto-reload
 ```
@@ -193,10 +196,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/VAULT.md](./docs/VAULT.md) fo
 
 ## Roadmap
 
-- [ ] VO2 max trends
+- [x] VO2 max trends
+- [x] Stress levels
+- [x] Training insights
 - [ ] Workout comparison
-- [ ] Stress levels
-- [ ] Training insights
 - [ ] Docker image
 
 ## License

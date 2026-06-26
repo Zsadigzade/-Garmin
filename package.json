@@ -1,9 +1,17 @@
 {
   "name": "garmin-bud",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GarminBud — talk to your Garmin Connect data through Claude and other MCP clients",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "QUICKSTART.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    ".env.example"
+  ],
   "bin": {
     "garmin-bud": "dist/index.js"
   },
@@ -16,7 +24,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src tests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "garmin",

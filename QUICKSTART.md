@@ -25,7 +25,7 @@ The setup wizard will:
 3. Authenticate with Garmin Connect
 4. Detect Cursor and Claude Desktop on your machine
 5. Offer to add GarminBud to your MCP client config automatically
-6. Optionally run a live API check against all 6 tools
+6. Optionally run a live API check against all 9 tools
 
 After setup, **restart your MCP client completely** (Cursor or Claude Desktop), then ask:
 
@@ -71,8 +71,11 @@ GarminBud live check
   get_heart_rate_trends     ✓  30-day trend loaded
   get_recovery_status       ✓  Score: 72 (Ready to train)
   get_body_composition      ✗  No body composition data found for the last 30 days.
+  get_stress_levels         ✓  7-day stress trend loaded
+  get_vo2_max_trends        ✓  30-day VO2 max trend loaded
+  get_training_insights     ✓  Weekly summary generated
 
-All 6 checks passed. GarminBud is ready to use.
+All 9 checks passed. GarminBud is ready to use.
 ```
 
 ## Manual setup (alternative)
