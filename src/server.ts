@@ -2,23 +2,19 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { executeTool, toolRegistry, toolSchemas } from "./tools/index.js";
 import { logger } from "./utils/logger.js";
-import { GarminApiError } from "./garmin/types.js";
-import { sanitizeErrorMessage } from "./utils/helpers.js";
 import { packageVersion } from "./version.js";
+import { formatToolError } from "./toolErrors.js";
 
 // SECTION: MCP Server
+
+export { formatToolError } from "./toolErrors.js";
 
 export interface GarminMcpServer {
   start: () => Promise<void>;
   close: () => Promise<void>;
 }
 
-export function createMcpServer(): GarminMcpServer {
-  const mcpServer = new McpServer({
-    name: "garmin-bud",
-    version: packageVersion,
-  });
-
+export function registerGarminTools(mcpServer: McpServer): void {
   for (const tool of toolRegistry) {
     const schema = toolSchemas[tool.name as keyof typeof toolSchemas];
 
@@ -57,11 +53,25 @@ export function createMcpServer(): GarminMcpServer {
       }
     );
   }
+}
 
+export function createMcpServerInstance(): McpServer {
+  const mcpServer = new McpServer({
+    name: "garmin-bud",
+    version: packageVersion,
+  });
+
+  registerGarminTools(mcpServer);
+  return mcpServer;
+}
+
+export function createMcpServer(): GarminMcpServer {
+  let mcpServer = createMcpServerInstance();
   let transport: StdioServerTransport | null = null;
 
   return {
     async start(): Promise<void> {
+      mcpServer = createMcpServerInstance();
       transport = new StdioServerTransport();
       await mcpServer.connect(transport);
       logger.info("GarminBud server started on stdio transport");
@@ -71,23 +81,4 @@ export function createMcpServer(): GarminMcpServer {
       transport = null;
     },
   };
-}
-
-export function formatToolError(error: unknown): string {
-  if (error instanceof GarminApiError) {
-    if (error.statusCode === 429) {
-      return `${error.message} Retry in ${error.retryAfterSeconds ?? 60} seconds.`;
-    }
-    return sanitizeErrorMessage(error.message);
-  }
-
-  if (error instanceof Error) {
-    if (error.message.toLowerCase().includes("authentication")) {
-      return `${sanitizeErrorMessage(error.message)} Run "garmin-bud auth" to re-authenticate.`;
-    }
-
-    return sanitizeErrorMessage(error.message);
-  }
-
-  return "An unexpected error occurred while executing the Garmin tool.";
 }

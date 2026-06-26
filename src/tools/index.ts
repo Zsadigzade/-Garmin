@@ -4,6 +4,9 @@ import { bodyCompositionToolDefinitions } from "./bodyComposition.js";
 import { heartRateToolDefinitions } from "./heartRate.js";
 import { recoveryToolDefinitions } from "./recovery.js";
 import { sleepToolDefinitions } from "./sleep.js";
+import { stressToolDefinitions } from "./stress.js";
+import { trainingInsightsToolDefinitions } from "./trainingInsights.js";
+import { vo2MaxToolDefinitions } from "./vo2Max.js";
 import type { ToolDefinition } from "./types.js";
 import type { ToolTextResult } from "../garmin/types.js";
 import { parseIsoDate } from "../utils/helpers.js";
@@ -16,6 +19,9 @@ export const toolRegistry: ToolDefinition[] = [
   ...heartRateToolDefinitions,
   ...recoveryToolDefinitions,
   ...bodyCompositionToolDefinitions,
+  ...stressToolDefinitions,
+  ...vo2MaxToolDefinitions,
+  ...trainingInsightsToolDefinitions,
 ];
 
 const toolHandlers = new Map<string, ToolDefinition["handler"]>(
@@ -72,6 +78,15 @@ export const toolSchemas = {
     resting_hr_weight: z.number().positive().optional(),
   }),
   get_body_composition: z.object({
+    days: z.number().int().positive().optional(),
+  }),
+  get_stress_levels: z.object({
+    days: z.number().int().positive().optional(),
+  }),
+  get_vo2_max_trends: z.object({
+    days: z.number().int().positive().optional(),
+  }),
+  get_training_insights: z.object({
     days: z.number().int().positive().optional(),
   }),
 };

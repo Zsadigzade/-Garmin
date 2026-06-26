@@ -16,11 +16,11 @@ import {
   sanitizeErrorMessage,
 } from "../src/utils/helpers.js";
 import type { ActivitySummary } from "../src/garmin/types.js";
-import { formatToolError } from "../src/server.js";
+import { formatToolError } from "../src/toolErrors.js";
 import { GarminApiError } from "../src/garmin/types.js";
 
 describe("tool registry", () => {
-  it("registers all six MVP tools", () => {
+  it("registers all nine MVP tools", () => {
     const names = toolRegistry.map((tool) => tool.name);
     assert.deepEqual(names, [
       "get_latest_activity",
@@ -29,6 +29,9 @@ describe("tool registry", () => {
       "get_heart_rate_trends",
       "get_recovery_status",
       "get_body_composition",
+      "get_stress_levels",
+      "get_vo2_max_trends",
+      "get_training_insights",
     ]);
   });
 });

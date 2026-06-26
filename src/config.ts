@@ -1,4 +1,5 @@
 import { config as loadEnv } from "dotenv";
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,11 +34,22 @@ export function getDistIndexPath(): string {
   return path.resolve(projectRoot, "dist", "index.js");
 }
 
-export function writeEnvFile(credentials: { email: string; password: string }): string {
+export function generateMcpApiKey(): string {
+  return randomBytes(32).toString("hex");
+}
+
+export function writeEnvFile(credentials: { email: string; password: string; apiKey?: string }): string {
   const envPath = getEnvFilePath();
+  const existing = fs.existsSync(envPath) ? fs.readFileSync(envPath, "utf8") : "";
+  const existingApiKey = existing.match(/^GARMIN_MCP_API_KEY=(.+)$/m)?.[1]?.trim();
+  const apiKey = credentials.apiKey ?? existingApiKey ?? generateMcpApiKey();
+
   const lines = [
     `GARMIN_EMAIL=${credentials.email}`,
     `GARMIN_PASSWORD=${credentials.password}`,
+    `GARMIN_MCP_API_KEY=${apiKey}`,
+    "GARMIN_MCP_HOST=127.0.0.1",
+    "GARMIN_MCP_PORT=3847",
     "GARMIN_SESSION_PATH=.garmin/session.json",
     "GARMIN_LOG_PATH=.garmin/mcp.log",
     "GARMIN_CACHE_PATH=.garmin/cache.db",
@@ -67,7 +79,24 @@ export const appConfig = {
   cacheTtlActivities: readNumber("CACHE_TTL_ACTIVITIES", 1800),
   cacheTtlSleep: readNumber("CACHE_TTL_SLEEP", 7200),
   cacheTtlStats: readNumber("CACHE_TTL_STATS", 3600),
+  get mcpHost(): string {
+    return process.env.GARMIN_MCP_HOST ?? "127.0.0.1";
+  },
+  get mcpPort(): number {
+    return readNumber("GARMIN_MCP_PORT", 3847);
+  },
+  get mcpApiKey(): string {
+    return process.env.GARMIN_MCP_API_KEY ?? "";
+  },
 };
+
+export function assertMcpApiKey(): void {
+  if (!appConfig.mcpApiKey) {
+    throw new Error(
+      'Missing GARMIN_MCP_API_KEY. Run "garmin-bud setup" or add GARMIN_MCP_API_KEY to .env before "garmin-bud serve".'
+    );
+  }
+}
 
 export function assertGarminCredentials(): void {
   if (!appConfig.garminEmail || !appConfig.garminPassword) {

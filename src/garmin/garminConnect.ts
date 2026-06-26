@@ -22,6 +22,7 @@ export interface GarminConnectInstance {
   getSleepData: (date?: Date) => Promise<SleepData>;
   getHeartRate: (date?: Date) => Promise<HeartRateData>;
   getDailyWeightData: (date?: Date) => Promise<WeightDataResponse>;
+  get: (url: string, data?: Record<string, unknown>) => Promise<unknown>;
 }
 
 const moduleRef = require("garmin-connect") as GarminConnectModule;

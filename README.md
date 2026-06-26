@@ -90,12 +90,16 @@ Restart your MCP client, then start asking questions.
 | `get_heart_rate_trends` | Resting, max, and average HR over time |
 | `get_recovery_status` | Recovery score from HRV, sleep, stress, resting HR |
 | `get_body_composition` | Weight, body fat, and muscle mass trends |
+| `get_stress_levels` | Daily stress averages and trends |
+| `get_vo2_max_trends` | VO2 max fitness trends over time |
+| `get_training_insights` | Combined weekly summary (activities, sleep, recovery, stress) |
 
 ## CLI
 
 ```bash
 garmin-bud setup          # Interactive first-time setup (recommended)
-garmin-bud check          # Live diagnostics against all 6 tools
+garmin-bud serve          # Remote HTTP MCP for web AI (claude.ai, ChatGPT)
+garmin-bud check          # Live diagnostics against all tools
 garmin-bud start          # Start the MCP server (stdio)
 garmin-bud auth           # Force re-authentication
 garmin-bud cache clear    # Clear cached data

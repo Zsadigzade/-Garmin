@@ -215,6 +215,12 @@ export async function runSetup(): Promise<void> {
 
   output.write("\nSetup complete.\n");
 
+  output.write("\nWeb AI connector (claude.ai, ChatGPT):\n");
+  output.write(`- API key saved to .env as GARMIN_MCP_API_KEY\n`);
+  output.write(`- Run: garmin-bud serve\n`);
+  output.write(`- See docs/WEB-MCP.md for Cloudflare Tunnel + claude.ai setup\n`);
+  output.write(`- Your API key: ${appConfig.mcpApiKey}\n`);
+
   if (selectedClients.length > 0) {
     output.write("\nNext steps:\n");
     output.write("- Restart your MCP client completely so it picks up the new server\n");

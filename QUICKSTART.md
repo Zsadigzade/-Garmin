@@ -114,11 +114,22 @@ You should see: `Garmin authentication successful. Session saved.`
 
 Restart your MCP client.
 
+## Web AI (claude.ai, ChatGPT)
+
+For web AI platforms that require remote MCP connectors:
+
+```bash
+garmin-bud serve
+```
+
+Then expose via HTTPS tunnel and add to claude.ai Connectors. Full guide: [docs/WEB-MCP.md](./docs/WEB-MCP.md)
+
 ## Useful commands
 
 ```bash
 garmin-bud setup         # Interactive first-time setup (recommended)
-garmin-bud check         # Live diagnostics against all 6 tools
+garmin-bud serve         # Remote HTTP MCP for web AI connectors
+garmin-bud check         # Live diagnostics against all tools
 garmin-bud status        # Check session + cache
 garmin-bud cache clear   # Force fresh data fetch
 garmin-bud auth          # Re-login if session expired

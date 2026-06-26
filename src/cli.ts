@@ -3,7 +3,8 @@ import { authenticateGarmin, clearStoredSession, sessionExists } from "./garmin/
 import { closeCache, getCache } from "./garmin/cache.js";
 import { resetGarminClient } from "./garmin/client.js";
 import { createMcpServer } from "./server.js";
-import { assertGarminCredentials, appConfig } from "./config.js";
+import { createHttpMcpServer, getRemoteConnectorInstructions } from "./httpServer.js";
+import { assertGarminCredentials, appConfig, assertMcpApiKey } from "./config.js";
 import { configureLogger, logger } from "./utils/logger.js";
 import { packageVersion } from "./version.js";
 import { runSetup } from "./setup.js";
@@ -70,6 +71,33 @@ async function runCheck(): Promise<void> {
   }
 }
 
+async function runServe(): Promise<void> {
+  assertGarminCredentials();
+  assertMcpApiKey();
+
+  const server = createHttpMcpServer();
+
+  const shutdown = async (signal: string): Promise<void> => {
+    logger.info({ signal }, "Shutting down GarminBud HTTP server");
+    await server.close();
+    process.exit(0);
+  };
+
+  process.once("SIGTERM", () => {
+    void shutdown("SIGTERM");
+  });
+  process.once("SIGINT", () => {
+    void shutdown("SIGINT");
+  });
+
+  await server.start();
+
+  console.log(`GarminBud HTTP MCP server running at http://${appConfig.mcpHost}:${appConfig.mcpPort}/mcp`);
+  console.log(`Health check: http://${appConfig.mcpHost}:${appConfig.mcpPort}/health`);
+  console.log("");
+  console.log(getRemoteConnectorInstructions(`https://your-tunnel-url.example.com`));
+}
+
 export function createCliProgram(): Command {
   const program = new Command();
 
@@ -113,6 +141,27 @@ export function createCliProgram(): Command {
         runCacheClear();
       } catch (error) {
         logger.error({ error }, "Failed to clear cache");
+        process.exitCode = 1;
+      }
+    });
+
+  program
+    .command("serve")
+    .description("Start remote MCP server (Streamable HTTP) for web AI connectors")
+    .option("-p, --port <number>", "HTTP port", (value) => Number.parseInt(value, 10))
+    .option("-H, --host <host>", "Bind host")
+    .action(async (options: { port?: number; host?: string }) => {
+      try {
+        if (options.port) {
+          process.env.GARMIN_MCP_PORT = String(options.port);
+        }
+        if (options.host) {
+          process.env.GARMIN_MCP_HOST = options.host;
+        }
+        await runServe();
+      } catch (error) {
+        logger.error({ error }, "Failed to start HTTP MCP server");
+        console.error(error instanceof Error ? error.message : "Failed to start HTTP MCP server");
         process.exitCode = 1;
       }
     });

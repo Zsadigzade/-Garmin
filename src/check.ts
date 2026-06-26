@@ -33,6 +33,9 @@ function buildDefaultToolChecks(): ToolCheckCase[] {
     { name: "get_heart_rate_trends", args: { days: 30 } },
     { name: "get_recovery_status", args: {} },
     { name: "get_body_composition", args: { days: 30 } },
+    { name: "get_stress_levels", args: { days: 7 } },
+    { name: "get_vo2_max_trends", args: { days: 30 } },
+    { name: "get_training_insights", args: { days: 7 } },
   ];
 }
 
@@ -102,6 +105,29 @@ function summarizeToolResult(name: string, text: string): { ok: boolean; summary
     return {
       ok: true,
       summary: daysMatch ? `${daysMatch[1]} recorded days` : "Body composition retrieved",
+    };
+  }
+
+  if (name === "get_stress_levels") {
+    const daysMatch = normalized.match(/(\d+) recorded days/i);
+    return {
+      ok: true,
+      summary: daysMatch ? `${daysMatch[1]} stress days loaded` : "Stress data retrieved",
+    };
+  }
+
+  if (name === "get_vo2_max_trends") {
+    const daysMatch = normalized.match(/(\d+) recorded days/i);
+    return {
+      ok: true,
+      summary: daysMatch ? `${daysMatch[1]} VO2 entries loaded` : "VO2 max trends loaded",
+    };
+  }
+
+  if (name === "get_training_insights") {
+    return {
+      ok: true,
+      summary: "Training insights summary generated",
     };
   }
 

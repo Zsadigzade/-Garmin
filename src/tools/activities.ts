@@ -34,7 +34,7 @@ function mapActivity(activity: IActivity): ActivitySummary {
   };
 }
 
-function formatActivitySummary(activity: ActivitySummary): string {
+export function formatActivitySummary(activity: ActivitySummary): string {
   return [
     `Activity: ${activity.name}`,
     `Type: ${activity.type}`,
@@ -81,7 +81,7 @@ async function fetchActivitiesPool(): Promise<{ activities: ActivitySummary[]; t
   };
 }
 
-async function getActivitiesPool(): Promise<{ activities: ActivitySummary[]; truncated: boolean }> {
+export async function getActivitiesPool(): Promise<{ activities: ActivitySummary[]; truncated: boolean }> {
   const cacheKey = buildToolCacheKey("activities_pool", {});
 
   return withCache(cacheKey, appConfig.cacheTtlActivities, fetchActivitiesPool);

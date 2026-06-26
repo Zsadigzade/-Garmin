@@ -25,7 +25,7 @@ An open-source MCP (Model Context Protocol) server that exposes Garmin Connect f
 
 ## Features
 
-- 6 MCP tools for common fitness questions
+- 9 MCP tools for common fitness questions
 - **Interactive setup wizard** — `garmin-bud setup` (credentials, auth, MCP client config)
 - **Live diagnostics** — `garmin-bud check` tests all 6 tools without an MCP client
 - Local-first — SQLite cache, session tokens in `.garmin/`
@@ -64,6 +64,9 @@ Full walkthrough: [QUICKSTART.md](../../QUICKSTART.md)
 | `get_heart_rate_trends` | Resting/max/average HR trends |
 | `get_recovery_status` | Composite recovery score + recommendation |
 | `get_body_composition` | Weight, body fat, muscle trends |
+| `get_stress_levels` | Daily stress averages and trends |
+| `get_vo2_max_trends` | VO2 max fitness trends |
+| `get_training_insights` | Combined weekly training summary |
 
 Sample prompts: [examples/prompts.md](../../examples/prompts.md)
 
@@ -71,7 +74,8 @@ Sample prompts: [examples/prompts.md](../../examples/prompts.md)
 
 ```bash
 garmin-bud setup          # Interactive first-time setup (credentials + MCP clients)
-garmin-bud check          # Live diagnostics against all 6 Garmin tools
+garmin-bud serve          # Remote HTTP MCP for web AI (claude.ai, ChatGPT)
+garmin-bud check          # Live diagnostics against all Garmin tools
 garmin-bud start          # Start MCP server (stdio)
 garmin-bud auth           # Force re-authentication
 garmin-bud cache clear    # Clear cached data

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { createMcpServer, formatToolError } from "../src/server.js";
+import { createMcpServer } from "../src/server.js";
+import { formatToolError } from "../src/toolErrors.js";
 import { executeTool, toolRegistry } from "../src/tools/index.js";
 import { packageVersion } from "../src/version.js";
 
@@ -9,7 +10,7 @@ describe("integration", () => {
     const server = createMcpServer();
     assert.equal(typeof server.start, "function");
     assert.equal(typeof server.close, "function");
-    assert.equal(toolRegistry.length, 6);
+    assert.equal(toolRegistry.length, 9);
   });
 
   it("reads package version for MCP handshake", () => {
