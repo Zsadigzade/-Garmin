@@ -21,7 +21,7 @@ npm test
 
 ## Project layout
 
-See [docs/vault/architecture.md](./docs/vault/architecture.md) for the source structure and design decisions.
+See [docs/VAULT.md](./docs/VAULT.md) for the source structure and design decisions (Obsidian vault at `05-Projects/garmin-bud/`).
 
 ## Reporting issues
 

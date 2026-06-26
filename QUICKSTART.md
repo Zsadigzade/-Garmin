@@ -149,4 +149,4 @@ garmin-bud start         # Start MCP server manually (stdio)
 
 - [README.md](./README.md) — full reference
 - [examples/prompts.md](./examples/prompts.md) — sample questions
-- [docs/vault/](./docs/vault/README.md) — architecture, branding, and design notes
+- [docs/VAULT.md](./docs/VAULT.md) — architecture, branding, and design notes (Obsidian vault)

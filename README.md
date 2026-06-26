@@ -151,7 +151,7 @@ npm run dev       # Start with auto-reload
 
 Use `.nvmrc` with nvm/fnm for Node 20. If your project path contains `#`, use `npm test` instead of `npm run test:vitest`.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) and the [project vault](./docs/vault/README.md) for architecture notes.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/VAULT.md](./docs/VAULT.md) for architecture and design notes (Obsidian vault, outside this repo).
 
 ## Roadmap
 
