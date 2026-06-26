@@ -5,6 +5,7 @@ import { closeCache } from "./garmin/cache.js";
 import { assertGarminCredentials, assertMcpApiKey, appConfig } from "./config.js";
 import { createMcpServerInstance } from "./server.js";
 import { configureLogger, logger } from "./utils/logger.js";
+import { buildWatchSummary } from "./watchApi.js";
 
 // SECTION: HTTP MCP Server
 
@@ -138,6 +139,34 @@ export function createHttpMcpServer(): HttpMcpServer {
 
         if (url.pathname === "/health") {
           sendJson(res, 200, { status: "ok", service: "garmin-bud" });
+          return;
+        }
+
+        if (url.pathname === "/api/watch") {
+          if (req.method !== "GET") {
+            sendJson(res, 405, { error: "Method Not Allowed", message: "Use GET for /api/watch." });
+            return;
+          }
+
+          if (!isAuthorized(req)) {
+            res.setHeader("WWW-Authenticate", 'Bearer realm="garmin-bud"');
+            sendJson(res, 401, {
+              error: "Unauthorized",
+              message: "Missing or invalid Authorization: Bearer token.",
+            });
+            return;
+          }
+
+          try {
+            const summary = await buildWatchSummary();
+            sendJson(res, 200, summary);
+          } catch (error) {
+            logger.error({ error }, "Watch API request failed");
+            sendJson(res, 500, {
+              error: "Internal Server Error",
+              message: "Failed to build watch summary.",
+            });
+          }
           return;
         }
 

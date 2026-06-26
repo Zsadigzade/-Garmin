@@ -81,6 +81,24 @@ To use skills in **every** project without the plugin, copy them to `~/.claude/s
 
 After setup, restart your MCP client and try `/garmin-bud` with *"What did I do today?"*
 
+## Garmin watch widget (Connect IQ)
+
+View recovery, sleep, activity, stress, and VO2 max on your Garmin watch via a Connect IQ widget in [`ciq/`](./ciq/).
+
+**Requires:** `garmin-bud serve` running + HTTPS tunnel (same setup as web AI).
+
+1. Start the server and tunnel:
+   ```bash
+   garmin-bud serve
+   cloudflared tunnel --url http://127.0.0.1:3847
+   ```
+2. Build and sideload the widget — see [ciq/README.md](./ciq/README.md)
+3. In **Garmin Connect Mobile** → Connect IQ → GarminBud settings, set:
+   - **Server URL** — your tunnel URL (e.g. `https://abc.trycloudflare.com`)
+   - **API Key** — your `GARMIN_MCP_API_KEY` from `.env`
+
+Tap the widget to cycle through data cards. The watch calls `GET /api/watch` — a compact JSON summary, not the full MCP protocol.
+
 ## Connect to Claude Desktop
 
 Edit `claude_desktop_config.json`:
@@ -185,7 +203,7 @@ garmin-bud --version      # Print version
 ```bash
 npm install
 npm run build
-npm test          # 32 tests via Node test runner
+npm test          # 33 tests via Node test runner
 npm run lint
 npm run dev       # Start with auto-reload
 ```

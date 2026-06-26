@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <setting propertyKey="@Properties.ServerUrl" title="@Strings.ServerUrlTitle">
+        <settingConfig type="alphaNumeric"/>
+    </setting>
+    <setting propertyKey="@Properties.ApiKey" title="@Strings.ApiKeyTitle">
+        <settingConfig type="alphaNumeric"/>
+    </setting>
+</settings>

@@ -53,6 +53,11 @@ describe("http MCP server", () => {
     assert.equal(response.status, 401);
   });
 
+  it("rejects watch API requests without bearer token", async () => {
+    const response = await fetch(`${baseUrl}/api/watch`);
+    assert.equal(response.status, 401);
+  });
+
   it("accepts MCP requests with valid bearer token", async () => {
     const response = await fetch(`${baseUrl}/mcp`, {
       method: "POST",

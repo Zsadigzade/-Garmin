@@ -2,6 +2,8 @@
 
 GarminBud supports **remote MCP** via Streamable HTTP so web AI platforms can access your Garmin data. Desktop clients (Cursor, Claude Desktop) continue to use `garmin-bud start` (stdio).
 
+The same HTTP server also powers the **Garmin Connect IQ watch widget** — it calls `GET /api/watch` instead of `/mcp`. See [ciq/README.md](../ciq/README.md).
+
 ## Prerequisites
 
 - Completed `garmin-bud setup` (creates `GARMIN_MCP_API_KEY` in `.env`)
@@ -18,6 +20,7 @@ Defaults:
 - Port: `3847` (`GARMIN_MCP_PORT`)
 - MCP endpoint: `http://127.0.0.1:3847/mcp`
 - Health check: `http://127.0.0.1:3847/health`
+- Watch summary: `http://127.0.0.1:3847/api/watch` (Connect IQ widget — see [ciq/README.md](../ciq/README.md))
 
 All `/mcp` requests require:
 

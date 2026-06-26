@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+    <property id="ServerUrl" type="string"></property>
+    <property id="ApiKey" type="string"></property>
+</properties>

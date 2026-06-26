@@ -4,6 +4,8 @@ GarminBud project knowledge lives in an external Obsidian vault, not in this rep
 
 **Location:** `C:\Users\zsadi\Desktop\Vault\First Vault\05-Projects\garmin-bud\`
 
+**Current release:** v0.2.0 (publish-ready)
+
 | Doc | Path |
 |-----|------|
 | Project home | `HOME.md` |

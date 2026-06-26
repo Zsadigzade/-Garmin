@@ -1,0 +1,15 @@
+<strings>
+    <string id="AppName">GarminBud</string>
+    <string id="ServerUrlTitle">Server URL</string>
+    <string id="ApiKeyTitle">API Key</string>
+    <string id="CardRecovery">Recovery</string>
+    <string id="CardSleep">Sleep</string>
+    <string id="CardActivity">Activity</string>
+    <string id="CardStress">Stress</string>
+    <string id="CardVo2Max">VO2 Max</string>
+    <string id="Loading">Loading...</string>
+    <string id="ConfigError">Set URL + API key in Garmin Connect app settings</string>
+    <string id="FetchError">Could not reach GarminBud</string>
+    <string id="NoData">No data</string>
+    <string id="TapHint">Tap to switch</string>
+</strings>
