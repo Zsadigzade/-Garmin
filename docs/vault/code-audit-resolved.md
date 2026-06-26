@@ -1,12 +1,31 @@
 # Code Audit — Resolution Log
 
+**Project:** GarminBud (`garmin-bud`)  
 **Audit date:** 2026-06-26  
 **Resolution date:** 2026-06-26  
+**Rebrand date:** 2026-06-26  
 **Findings:** 26 total — **26 resolved**
 
 ## Summary
 
-Deep code analysis identified 2 critical, 7 high, 9 medium, and 8 low issues. All were implemented in a single hardening pass. Test suite expanded from 11 to 22 tests.
+Deep code analysis identified 2 critical, 7 high, 9 medium, and 8 low issues. All were implemented in a single hardening pass. Test suite expanded from 11 to 22 tests. Product subsequently rebranded from `garmin-mcp` to **GarminBud**.
+
+---
+
+## Rebrand (2026-06-26)
+
+| Item | Before | After |
+|------|--------|-------|
+| Product name | Garmin MCP Server | **GarminBud** |
+| Tagline | — | Talk to your Garmin data. |
+| npm / CLI | `garmin-mcp` | `garmin-bud` |
+| MCP server id | `garmin-mcp` | `garmin-bud` |
+| GitHub repo | `Zsadigzade/-Garmin` | `Zsadigzade/garmin-bud` |
+| Local data dir | `.garmin/` | `.garmin/` (unchanged) |
+
+Docs added/updated: README (product page), QUICKSTART, CONTRIBUTING, LICENSE, vault, canvas.
+
+See [branding.md](./branding.md) for full identity reference.
 
 ---
 
@@ -41,7 +60,7 @@ Deep code analysis identified 2 critical, 7 high, 9 medium, and 8 low issues. Al
 | M6 | Cache never closed on exit | `closeCache()` + shutdown handlers |
 | M7 | Missing await on auth retry | `return await operation(client)` |
 | M8 | Raw errors forwarded to MCP client | `sanitizeErrorMessage()` in `formatToolError()` |
-| M9 | Unused `getDatesBetween` | Kept; used via shared `filterActivitiesByRange()` helper |
+| M9 | Unused `getDatesBetween` | Kept; date logic centralized in `filterActivitiesByRange()` |
 
 ## Low (8/8 resolved)
 
@@ -52,39 +71,58 @@ Deep code analysis identified 2 critical, 7 high, 9 medium, and 8 low issues. Al
 | L3 | Logger created .garmin/ at import | Lazy init; file log only after `configureLogger()` |
 | L4 | `runCacheClear` unnecessarily async | Changed to sync function |
 | L5 | No .nvmrc | Added `.nvmrc` with Node 20 |
-| L6 | Weak integration tests | Added validation, error sanitization, version tests |
+| L6 | Weak integration tests | Expanded to 22 tests: validation, sanitization, version, recovery |
 | L7 | No SIGTERM/SIGINT handlers | Handlers in `runStart()` |
 | L8 | No CI publish job | `.github/workflows/publish.yml` for `v*` tags |
 
 ---
 
-## New files added
+## Files added during hardening + rebrand
 
+**Source:**
 - `src/version.ts`
 - `src/utils/batch.ts`
 - `src/garmin/garminApiTypes.ts`
 - `src/tools/types.ts`
+
+**Project:**
 - `.nvmrc`
+- `LICENSE`
+- `CONTRIBUTING.md`
 - `.github/workflows/publish.yml`
 - `docs/vault/` (this documentation set)
 
-## Test coverage after audit
+## Test coverage
 
-**22 tests passing** across auth, cache, helpers, recovery scoring, tool errors, and integration.
+**22 tests passing** across:
 
-Still not covered (future work):
+- Auth session persistence (2)
+- GarminCache — miss, TTL, buildKey stability, clear (5)
+- Tool registry (1)
+- Helpers — dates, trends, hashParams, filterActivitiesByRange, sanitization (6)
+- Recovery scoring (2)
+- Tool errors — rate limit formatting (1)
+- Integration — server, version, executeTool validation, error sanitization (5)
+
+### Still not covered (future work)
 
 - Live Garmin API tool handler tests (requires mocks or credentials)
 - `withGarminClient` auth-retry against real 401 responses
 - SIGTERM handler end-to-end
 - MCP protocol message structure validation
 
-## Phase 2 blockers updated
+## Phase 2 blockers (current)
 
-| Goal | Previous blocker | Current status |
-|------|------------------|----------------|
-| Docker image | C1 stdout pollution | **Unblocked** — Dockerfile still needed |
-| Workout comparison | H7 200-activity cap | **Partially unblocked** — 500 cap with warning |
-| VO2 max trends | No API mapping | Still blocked |
-| Stress levels | No endpoint mapped | Still blocked |
-| Training insights | No aggregation layer | Still blocked |
+| Goal | Status | Notes |
+|------|--------|-------|
+| Docker image | Unblocked (C1 fixed) | Dockerfile still needed |
+| Workout comparison | Partially unblocked (H7) | 500-activity cap with warning |
+| VO2 max trends | Blocked | No API mapping in garminConnect.ts |
+| Stress levels | Blocked | getDailyStress() not wrapped |
+| Training insights | Blocked | No cross-tool aggregation layer |
+
+## Related docs
+
+- [Branding](./branding.md)
+- [Architecture](./architecture.md)
+- [Project overview](./project-overview.md)

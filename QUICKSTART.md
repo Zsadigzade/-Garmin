@@ -94,4 +94,4 @@ garmin-bud auth          # Re-login if session expired
 
 - [README.md](./README.md) — full reference
 - [examples/prompts.md](./examples/prompts.md) — sample questions
-- [docs/vault/](./docs/vault/project-overview.md) — architecture and design notes
+- [docs/vault/](./docs/vault/README.md) — architecture, branding, and design notes
