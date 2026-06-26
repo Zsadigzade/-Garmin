@@ -7,14 +7,14 @@ import { GarminCache } from "../src/garmin/cache.js";
 
 describe("GarminCache", () => {
   let cache: GarminCache;
-  let tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-mcp-cache-"));
+  let tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-bud-cache-"));
 
   afterEach(() => {
     cache.close();
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-mcp-cache-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-bud-cache-"));
   });
 
   it("returns null on cache miss", () => {

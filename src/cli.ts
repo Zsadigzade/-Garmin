@@ -16,7 +16,7 @@ async function runStart(): Promise<void> {
   const server = createMcpServer();
 
   const shutdown = async (signal: string): Promise<void> => {
-    logger.info({ signal }, "Shutting down Garmin MCP server");
+    logger.info({ signal }, "Shutting down GarminBud server");
     await server.close();
     closeCache();
     process.exit(0);
@@ -53,7 +53,7 @@ async function runStatus(): Promise<void> {
   const cache = getCache();
   const cacheStats = cache.stats();
 
-  console.log("Garmin MCP status");
+  console.log("GarminBud status");
   console.log(`Session: ${sessionExists() ? "present" : "missing"}`);
   console.log(`Cache entries: ${cacheStats.entries}`);
   console.log(`Expired cache entries: ${cacheStats.expiredEntries}`);
@@ -63,8 +63,8 @@ export function createCliProgram(): Command {
   const program = new Command();
 
   program
-    .name("garmin-mcp")
-    .description("MCP server for Garmin Connect fitness data")
+    .name("garmin-bud")
+    .description("GarminBud — MCP server for Garmin Connect fitness data")
     .version(packageVersion);
 
   program

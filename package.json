@@ -1,11 +1,11 @@
 {
-  "name": "garmin-mcp",
+  "name": "garmin-bud",
   "version": "0.1.0",
-  "description": "MCP server exposing Garmin Connect fitness data as tools for AI agents",
+  "description": "GarminBud — talk to your Garmin Connect data through Claude and other MCP clients",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "garmin-mcp": "dist/index.js"
+    "garmin-bud": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -20,13 +20,24 @@
   },
   "keywords": [
     "garmin",
+    "garmin-connect",
     "mcp",
     "model-context-protocol",
+    "claude",
     "fitness",
-    "health"
+    "health",
+    "garminbud"
   ],
-  "author": "",
+  "author": "Zsadigzade",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zsadigzade/garmin-bud.git"
+  },
+  "homepage": "https://github.com/Zsadigzade/garmin-bud#readme",
+  "bugs": {
+    "url": "https://github.com/Zsadigzade/garmin-bud/issues"
+  },
   "engines": {
     "node": ">=20.0.0"
   },

@@ -1,4 +1,4 @@
-# garmin-mcp Vault
+# GarminBud Vault
 
 Project knowledge base for architecture, decisions, and audit history.
 
@@ -13,5 +13,6 @@ Project knowledge base for architecture, decisions, and audit history.
 - [README](../../README.md) — user-facing documentation
 - [CHANGELOG](../../CHANGELOG.md) — release history
 - [QUICKSTART](../../QUICKSTART.md) — setup guide
+- [CONTRIBUTING](../../CONTRIBUTING.md) — contribution guide
 
 Interactive audit dashboard: open `garmin-deep-analysis.canvas.tsx` beside the chat in Cursor.

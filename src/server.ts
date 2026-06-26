@@ -15,7 +15,7 @@ export interface GarminMcpServer {
 
 export function createMcpServer(): GarminMcpServer {
   const mcpServer = new McpServer({
-    name: "garmin-mcp",
+    name: "garmin-bud",
     version: packageVersion,
   });
 
@@ -64,7 +64,7 @@ export function createMcpServer(): GarminMcpServer {
     async start(): Promise<void> {
       transport = new StdioServerTransport();
       await mcpServer.connect(transport);
-      logger.info("Garmin MCP server started on stdio transport");
+      logger.info("GarminBud server started on stdio transport");
     },
     async close(): Promise<void> {
       await mcpServer.close();
@@ -83,7 +83,7 @@ export function formatToolError(error: unknown): string {
 
   if (error instanceof Error) {
     if (error.message.toLowerCase().includes("authentication")) {
-      return `${sanitizeErrorMessage(error.message)} Run "garmin-mcp auth" to re-authenticate.`;
+      return `${sanitizeErrorMessage(error.message)} Run "garmin-bud auth" to re-authenticate.`;
     }
 
     return sanitizeErrorMessage(error.message);

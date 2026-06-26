@@ -1,22 +1,22 @@
-# Quickstart (5 minutes)
+# Quickstart
 
-Get Garmin MCP running locally and connected to Claude.
+Get GarminBud running in about 5 minutes.
 
-## 1. Prerequisites
+## Prerequisites
 
-- Node.js 20 or newer
+- Node.js 20 or newer ([`.nvmrc`](./.nvmrc) included)
 - A Garmin Connect account with synced device data
 - Garmin Connect **MFA disabled** (the underlying library does not support MFA yet)
 
-## 2. Install
+## 1. Install
 
 ```bash
-git clone <your-repo-url> garmin-mcp
-cd garmin-mcp
+git clone https://github.com/Zsadigzade/garmin-bud.git
+cd garmin-bud
 npm install
 ```
 
-## 3. Configure credentials
+## 2. Configure credentials
 
 ```bash
 cp .env.example .env
@@ -29,16 +29,16 @@ GARMIN_EMAIL=your@email.com
 GARMIN_PASSWORD=yourpassword
 ```
 
-## 4. Build and authenticate
+## 3. Build and authenticate
 
 ```bash
 npm run build
-npx garmin-mcp auth
+npx garmin-bud auth
 ```
 
 You should see: `Garmin authentication successful. Session saved.`
 
-## 5. Start the MCP server
+## 4. Start the server
 
 ```bash
 npm run start
@@ -50,7 +50,7 @@ For development with auto-reload:
 npm run dev
 ```
 
-## 6. Connect to Claude Desktop
+## 5. Connect to Claude Desktop
 
 Edit your Claude Desktop MCP config:
 
@@ -60,9 +60,9 @@ Edit your Claude Desktop MCP config:
 ```json
 {
   "mcpServers": {
-    "garmin": {
+    "garmin-bud": {
       "command": "node",
-      "args": ["C:/path/to/garmin-mcp/dist/index.js", "start"],
+      "args": ["C:/path/to/garmin-bud/dist/index.js", "start"],
       "env": {
         "GARMIN_EMAIL": "your@email.com",
         "GARMIN_PASSWORD": "yourpassword"
@@ -74,7 +74,7 @@ Edit your Claude Desktop MCP config:
 
 Restart Claude Desktop.
 
-## 7. Test it
+## 6. Test it
 
 Ask Claude:
 
@@ -85,13 +85,13 @@ Ask Claude:
 ## Useful commands
 
 ```bash
-garmin-mcp status        # Check session + cache
-garmin-mcp cache clear   # Force fresh data fetch
-garmin-mcp auth          # Re-login if session expired
+garmin-bud status        # Check session + cache
+garmin-bud cache clear   # Force fresh data fetch
+garmin-bud auth          # Re-login if session expired
 ```
 
 ## Next steps
 
-- Read [README.md](./README.md) for full API reference
-- Try prompts from [examples/prompts.md](./examples/prompts.md)
-- Review [docs/vault/](./docs/vault/project-overview.md) for architecture and audit notes
+- [README.md](./README.md) — full reference
+- [examples/prompts.md](./examples/prompts.md) — sample questions
+- [docs/vault/](./docs/vault/project-overview.md) — architecture and design notes

@@ -1,16 +1,22 @@
-# garmin-mcp — Project Overview
+# GarminBud — Project Overview
 
-**Status:** Active · v0.1.0 (post-audit hardening applied)  
+**Status:** Active · v0.1.0  
 **Last updated:** 2026-06-26
 
 ## What it is
 
-Open-source MCP (Model Context Protocol) server that exposes Garmin Connect fitness data as tools for Claude and other AI agents. Users query activities, sleep, heart rate, recovery, and body composition in natural language — locally, with SQLite caching and session persistence.
+**GarminBud** — *Talk to your Garmin data.*
+
+An open-source MCP (Model Context Protocol) server that exposes Garmin Connect fitness data as tools for Claude, Cursor, and other AI agents. Users query activities, sleep, heart rate, recovery, and body composition in natural language — locally, with SQLite caching and session persistence.
+
+> Unofficial community project — not affiliated with Garmin Ltd.
 
 ## Repository
 
-- **Package:** `garmin-mcp`
-- **Remote:** https://github.com/Zsadigzade/-Garmin.git
+- **Product:** GarminBud
+- **Package:** `garmin-bud`
+- **CLI:** `garmin-bud`
+- **Remote:** https://github.com/Zsadigzade/garmin-bud
 - **License:** MIT
 - **Node:** >= 20 (see `.nvmrc`)
 
@@ -29,7 +35,7 @@ Open-source MCP (Model Context Protocol) server that exposes Garmin Connect fitn
 
 - Uses unofficial [`garmin-connect`](https://www.npmjs.com/package/garmin-connect) npm package
 - Email/password auth only — **MFA not supported**
-- MCP stdio transport (Claude Desktop compatible)
+- MCP stdio transport (Claude Desktop, Cursor compatible)
 - Local storage: `.garmin/session.json`, `.garmin/cache.db`, `.garmin/mcp.log`
 
 ## Phase 2 roadmap (not yet implemented)
@@ -38,7 +44,7 @@ Open-source MCP (Model Context Protocol) server that exposes Garmin Connect fitn
 - Workout comparison
 - Stress levels
 - Training insights
-- Docker image (stdio fix applied — Dockerfile still needed)
+- Docker image
 
 ## Related docs
 

@@ -11,7 +11,7 @@ import {
 } from "../src/garmin/auth.js";
 
 describe("auth session persistence", () => {
-  let tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-mcp-auth-"));
+  let tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-bud-auth-"));
   const previousSessionPath = process.env.GARMIN_SESSION_PATH;
 
   function sessionPath(): string {
@@ -29,7 +29,7 @@ describe("auth session persistence", () => {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
 
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-mcp-auth-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "garmin-bud-auth-"));
   });
 
   it("writes and reads a stored session", () => {

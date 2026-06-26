@@ -1,13 +1,13 @@
-# garmin-mcp — Architecture
+# GarminBud — Architecture
 
-**Last updated:** 2026-06-26 (post-audit)
+**Last updated:** 2026-06-26
 
 ## Data flow
 
 ```
-Claude → MCP Server (stdio) → Tool Registry → Cache (SQLite) → Garmin Client → Garmin Connect
-                                                    ↓ miss
-                                              Session Auth (.garmin/session.json)
+Claude / Cursor → MCP Server (stdio) → Tool Registry → Cache (SQLite) → Garmin Client → Garmin Connect
+                                                          ↓ miss
+                                                    Session Auth (.garmin/session.json)
 ```
 
 ## Source layout
@@ -16,7 +16,7 @@ Claude → MCP Server (stdio) → Tool Registry → Cache (SQLite) → Garmin Cl
 src/
 ├── index.ts          # CLI entry
 ├── cli.ts            # start, auth, cache clear, status + shutdown handlers
-├── server.ts         # MCP server, tool registration, sanitized errors
+├── server.ts         # MCP server (id: garmin-bud), tool registration
 ├── config.ts         # env loading, getSessionPath(), assertGarminCredentials()
 ├── version.ts        # reads version from package.json
 ├── garmin/
@@ -44,12 +44,12 @@ src/
 ### API call batching
 
 - Sleep, heart rate, and body composition use `mapInBatches()` with concurrency 6
-- Single `withGarminClient()` session per multi-day fetch (not one client per day)
+- Single `withGarminClient()` session per multi-day fetch
 
 ### Activities pool
 
 - Shared `activities_pool` cache entry (up to 500 activities, paginated in pages of 100)
-- Range queries filter from pool — no redundant fetches per date range
+- Range queries filter from pool
 - Truncation warning when 500-activity cap is hit
 
 ### Logging
@@ -65,26 +65,14 @@ src/
 
 - Single source: `package.json` via `src/version.ts`
 
-## Authentication flow
-
-1. `runStart()` validates credentials before attaching stdio
-2. On tool call, `withGarminClient()` restores session from disk or logs in
-3. On 401/403, client resets and re-authenticates once
-
-## Security notes
-
-- Credentials in `.env` only
-- Session file treated like a password
-- Tool errors sanitized before returning to MCP client (`sanitizeErrorMessage`)
-
 ## CI/CD
 
 - **CI** (`.github/workflows/ci.yml`): typecheck, build, test, lint on push/PR
-- **Publish** (`.github/workflows/publish.yml`): npm publish + GitHub Release on `v*` tags (requires `NPM_TOKEN`)
+- **Publish** (`.github/workflows/publish.yml`): npm publish + GitHub Release on `v*` tags
 
 ## Known remaining gaps
 
-- No HTTP/SSE MCP transport (blocks remote/Docker deployment)
+- No HTTP/SSE MCP transport
 - No in-flight request deduplication across concurrent tool calls
-- Tool handlers not integration-tested against live Garmin API (mock-free unit tests only)
+- Tool handlers not integration-tested against live Garmin API
 - MFA still unsupported by underlying library

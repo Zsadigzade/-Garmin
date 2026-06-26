@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **Rebranded** from garmin-mcp to **GarminBud** (package `garmin-bud`, CLI `garmin-bud`)
+- README rewritten as product page with disclaimer, badges, and security section
+- Added CONTRIBUTING.md; updated vault docs and examples
 - Removed imports from internal `garmin-connect/dist/` paths
 - Tool registry uses shared `ToolDefinition` interface without unsafe casts
 - `runCacheClear` is synchronous

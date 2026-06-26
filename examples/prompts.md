@@ -1,6 +1,6 @@
-# Example Prompts for Claude
+# Example Prompts
 
-Use these prompts after connecting `garmin-mcp` in your MCP client.
+Use these prompts after connecting **GarminBud** in your MCP client.
 
 ## Activities
 
