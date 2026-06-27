@@ -5,15 +5,17 @@ import { closeCache } from "./garmin/cache.js";
 import { assertGarminCredentials, assertMcpApiKey, appConfig } from "./config.js";
 import { createMcpServerInstance } from "./server.js";
 import { configureLogger, logger } from "./utils/logger.js";
-import { buildWatchSummary } from "./watchApi.js";
+import { buildWatchSummary, type WatchSummary } from "./watchApi.js";
 
 // SECTION: HTTP MCP Server
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
+const WATCH_API_CACHE_TTL_MS = 5 * 60_000;
 
 const requestLog = new Map<string, { count: number; windowStart: number }>();
+let watchApiCache: { summary: WatchSummary; expiresAt: number } | null = null;
 
 export interface HttpMcpServer {
   start: () => Promise<void>;
@@ -50,6 +52,20 @@ function isAuthorized(req: IncomingMessage): boolean {
 
   const token = header.slice("Bearer ".length).trim();
   return token.length > 0 && token === appConfig.mcpApiKey;
+}
+
+async function getCachedWatchSummary(): Promise<WatchSummary> {
+  const now = Date.now();
+  if (watchApiCache && now < watchApiCache.expiresAt) {
+    return watchApiCache.summary;
+  }
+
+  const summary = await buildWatchSummary();
+  watchApiCache = {
+    summary,
+    expiresAt: now + WATCH_API_CACHE_TTL_MS,
+  };
+  return summary;
 }
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
@@ -158,7 +174,7 @@ export function createHttpMcpServer(): HttpMcpServer {
           }
 
           try {
-            const summary = await buildWatchSummary();
+            const summary = await getCachedWatchSummary();
             sendJson(res, 200, summary);
           } catch (error) {
             logger.error({ error }, "Watch API request failed");
@@ -221,6 +237,7 @@ export function createHttpMcpServer(): HttpMcpServer {
       });
 
       httpServer = null;
+      watchApiCache = null;
       closeCache();
     },
   };

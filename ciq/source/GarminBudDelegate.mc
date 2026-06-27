@@ -8,27 +8,47 @@ class GarminBudDelegate extends WatchUi.BehaviorDelegate {
         BehaviorDelegate.initialize();
     }
 
-    function onTap(clickEvent as WatchUi.ClickEvent) as Boolean {
+    private function handleNavigation() as Void {
         var app = Application.getApp() as GarminBudApp;
+        var status = app.getStatus();
 
-        if (app.getStatus().equals("ready")) {
+        if (status.equals("ready") || status.equals("stale")) {
             app.nextCard();
             WatchUi.requestUpdate();
-        } else if (app.getStatus().equals("error") || app.getStatus().equals("config")) {
+        } else if (status.equals("error") || status.equals("config")) {
             app.fetchSummary();
         }
+    }
 
+    private function handlePreviousCard() as Void {
+        var app = Application.getApp() as GarminBudApp;
+        var status = app.getStatus();
+
+        if (status.equals("ready") || status.equals("stale")) {
+            app.prevCard();
+            WatchUi.requestUpdate();
+        } else if (status.equals("error") || status.equals("config")) {
+            app.fetchSummary();
+        }
+    }
+
+    function onTap(clickEvent as WatchUi.ClickEvent) as Boolean {
+        handleNavigation();
         return true;
     }
 
     function onSelect() as Boolean {
-        var app = Application.getApp() as GarminBudApp;
+        handleNavigation();
+        return true;
+    }
 
-        if (app.getStatus().equals("ready")) {
-            app.nextCard();
-            WatchUi.requestUpdate();
-        } else if (app.getStatus().equals("error") || app.getStatus().equals("config")) {
-            app.fetchSummary();
+    function onSwipe(swipeEvent as WatchUi.SwipeEvent) as Boolean {
+        var direction = swipeEvent.getDirection();
+
+        if (direction == WatchUi.SWIPE_LEFT) {
+            handleNavigation();
+        } else if (direction == WatchUi.SWIPE_RIGHT) {
+            handlePreviousCard();
         }
 
         return true;

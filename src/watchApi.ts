@@ -16,7 +16,21 @@ export interface WatchSleep {
 export interface WatchActivity {
   name: string;
   distance_km: number | null;
+  duration_min: number | null;
+  avg_hr: number | null;
   date: string;
+}
+
+export interface WatchHeartRate {
+  resting: number;
+  max: number | null;
+}
+
+export interface WatchDailyOverview {
+  recovery: number | null;
+  sleep_h: number | null;
+  stress: number | null;
+  vo2max: number | null;
 }
 
 export interface WatchStress {
@@ -30,11 +44,13 @@ export interface WatchVo2Max {
 }
 
 export interface WatchSummary {
+  daily_overview: WatchDailyOverview;
   recovery: WatchRecovery | null;
   sleep: WatchSleep | null;
   activity: WatchActivity | null;
   stress: WatchStress | null;
   vo2max: WatchVo2Max | null;
+  heart_rate: WatchHeartRate | null;
   updated_at: string;
 }
 
@@ -86,16 +102,27 @@ function parseRecovery(text: string): WatchRecovery | null {
 }
 
 function parseDurationHours(duration: string): number | null {
-  const hourMatch = duration.match(/(\d+)h/);
-  const minuteMatch = duration.match(/(\d+)m/);
-  const hours = hourMatch ? Number.parseInt(hourMatch[1] ?? "", 10) : 0;
-  const minutes = minuteMatch ? Number.parseInt(minuteMatch[1] ?? "", 10) : 0;
-
-  if (!hourMatch && !minuteMatch) {
+  const minutes = parseDurationMinutes(duration);
+  if (minutes === null) {
     return null;
   }
 
-  return Math.round((hours + minutes / 60) * 10) / 10;
+  return Math.round((minutes / 60) * 10) / 10;
+}
+
+function parseDurationMinutes(duration: string): number | null {
+  const hourMatch = duration.match(/(\d+)h/);
+  const minuteMatch = duration.match(/(\d+)m/);
+  const secondMatch = duration.match(/(\d+)s/);
+  const hours = hourMatch ? Number.parseInt(hourMatch[1] ?? "", 10) : 0;
+  const minutes = minuteMatch ? Number.parseInt(minuteMatch[1] ?? "", 10) : 0;
+  const seconds = secondMatch ? Number.parseInt(secondMatch[1] ?? "", 10) : 0;
+
+  if (!hourMatch && !minuteMatch && !secondMatch) {
+    return null;
+  }
+
+  return Math.round(hours * 60 + minutes + seconds / 60);
 }
 
 function parseSleep(text: string): WatchSleep | null {
@@ -159,9 +186,14 @@ function parseActivity(text: string): WatchActivity | null {
     distanceKm = Math.round((Number.parseFloat(distanceMMatch[1] ?? "") / 1000) * 100) / 100;
   }
 
+  const durationMatch = text.match(/^Duration:\s*([^\n]+)/m);
+  const avgHrMatch = text.match(/^Avg HR:\s*(\d+)\s*bpm/mi);
+
   return {
     name: nameMatch[1]?.trim() ?? "Activity",
     distance_km: distanceKm,
+    duration_min: durationMatch ? parseDurationMinutes(durationMatch[1] ?? "") : null,
+    avg_hr: avgHrMatch ? Number.parseInt(avgHrMatch[1] ?? "", 10) : null,
     date: dateMatch?.[1]?.trim() ?? "",
   };
 }
@@ -208,6 +240,39 @@ function parseVo2Max(text: string): WatchVo2Max | null {
   };
 }
 
+function parseHeartRate(text: string): WatchHeartRate | null {
+  if (isNoData(text)) {
+    return null;
+  }
+
+  const restingMatch = text.match(/Current resting HR:\s*(\d+)\s*bpm/i);
+  if (!restingMatch) {
+    return null;
+  }
+
+  const recentMaxMatch = text.match(/resting \d+ bpm, max (\d+) bpm/i);
+  const max = recentMaxMatch ? Number.parseInt(recentMaxMatch[1] ?? "", 10) : null;
+
+  return {
+    resting: Number.parseInt(restingMatch[1] ?? "", 10),
+    max,
+  };
+}
+
+function buildDailyOverview(
+  recovery: WatchRecovery | null,
+  sleep: WatchSleep | null,
+  stress: WatchStress | null,
+  vo2max: WatchVo2Max | null
+): WatchDailyOverview {
+  return {
+    recovery: recovery?.score ?? null,
+    sleep_h: sleep?.hours ?? null,
+    stress: stress?.avg ?? null,
+    vo2max: vo2max?.value ?? null,
+  };
+}
+
 async function safeExecuteTool(name: string, args: Record<string, unknown>): Promise<string | null> {
   try {
     const result = await executeTool(name, args);
@@ -221,20 +286,31 @@ async function safeExecuteTool(name: string, args: Record<string, unknown>): Pro
 }
 
 export async function buildWatchSummary(): Promise<WatchSummary> {
-  const [recoveryText, sleepText, activityText, stressText, vo2Text] = await Promise.all([
-    safeExecuteTool("get_recovery_status", {}),
-    safeExecuteTool("get_sleep_data", { nights: 1 }),
-    safeExecuteTool("get_latest_activity", {}),
-    safeExecuteTool("get_stress_levels", { days: 7 }),
-    safeExecuteTool("get_vo2_max_trends", { days: 30 }),
-  ]);
+  const [recoveryText, sleepText, activityText, stressText, vo2Text, heartRateText] =
+    await Promise.all([
+      safeExecuteTool("get_recovery_status", {}),
+      safeExecuteTool("get_sleep_data", { nights: 1 }),
+      safeExecuteTool("get_latest_activity", {}),
+      safeExecuteTool("get_stress_levels", { days: 7 }),
+      safeExecuteTool("get_vo2_max_trends", { days: 30 }),
+      safeExecuteTool("get_heart_rate_trends", { days: 7 }),
+    ]);
+
+  const recovery = recoveryText ? parseRecovery(recoveryText) : null;
+  const sleep = sleepText ? parseSleep(sleepText) : null;
+  const activity = activityText ? parseActivity(activityText) : null;
+  const stress = stressText ? parseStress(stressText) : null;
+  const vo2max = vo2Text ? parseVo2Max(vo2Text) : null;
+  const heartRate = heartRateText ? parseHeartRate(heartRateText) : null;
 
   return {
-    recovery: recoveryText ? parseRecovery(recoveryText) : null,
-    sleep: sleepText ? parseSleep(sleepText) : null,
-    activity: activityText ? parseActivity(activityText) : null,
-    stress: stressText ? parseStress(stressText) : null,
-    vo2max: vo2Text ? parseVo2Max(vo2Text) : null,
+    daily_overview: buildDailyOverview(recovery, sleep, stress, vo2max),
+    recovery,
+    sleep,
+    activity,
+    stress,
+    vo2max,
+    heart_rate: heartRate,
     updated_at: new Date().toISOString(),
   };
 }

@@ -73,14 +73,20 @@ connectiq
 
 1. Add the **GarminBud** widget to your watch face widget loop
 2. Open it — it fetches fresh data from your server
-3. **Tap** to cycle through cards:
-   - Recovery (score + label)
-   - Sleep (hours + score)
-   - Activity (name + distance)
-   - Stress (average + label)
-   - VO2 Max (value + trend)
+3. **Tap** or **swipe left/right** to cycle through cards:
+   - **Overview** — recovery, sleep, stress, and VO2 max at a glance
+   - **Recovery** — score with color ring (round watches) or progress bar
+   - **Sleep** — hours + quality score
+   - **Activity** — name, duration, distance, and average HR
+   - **Stress** — average + label
+   - **VO2 Max** — value + trend
+   - **Heart Rate** — resting HR + max
 
-Tap again on error/config screens to retry.
+Tap or swipe on error/config screens to retry. If the server is unreachable, the widget shows your last cached summary with a stale indicator.
+
+## Connect IQ Store
+
+See [STORE-LISTING.md](STORE-LISTING.md) for submission copy, assets, and checklist. Privacy policy: [docs/PRIVACY-POLICY.md](../docs/PRIVACY-POLICY.md).
 
 ## API endpoint
 
@@ -95,11 +101,19 @@ Example response:
 
 ```json
 {
+  "daily_overview": { "recovery": 72, "sleep_h": 7.5, "stress": 28, "vo2max": 48.5 },
   "recovery": { "score": 72, "label": "Light" },
   "sleep": { "hours": 7.5, "score": 85, "label": "Great" },
-  "activity": { "name": "Morning Run", "distance_km": 5.2, "date": "2026-06-26 07:30:00" },
+  "activity": {
+    "name": "Morning Run",
+    "distance_km": 5.2,
+    "duration_min": 32,
+    "avg_hr": 148,
+    "date": "2026-06-26 07:30:00"
+  },
   "stress": { "avg": 28, "label": "Medium" },
   "vo2max": { "value": 48.5, "trend": "stable" },
+  "heart_rate": { "resting": 52, "max": 171 },
   "updated_at": "2026-06-26T21:00:00.000Z"
 }
 ```
@@ -113,10 +127,10 @@ Each field is `null` if that metric is unavailable — the widget shows "No data
 | "Set URL + API key..." | Configure settings in Garmin Connect Mobile and sync |
 | "Could not reach GarminBud" | Ensure `garmin-bud serve` and tunnel are running; URL must be HTTPS |
 | -400 on device | Response must be JSON object with `Content-Type: application/json` (GarminBud handles this) |
-| Stale data | Re-open the widget to fetch again |
+| Stale data | Re-open the widget to fetch again; cached data shows with a yellow "Updated Xm ago" banner |
 
 ## Connect IQ Store
 
-This widget is for sideloading during development. Publishing to the Connect IQ Store requires a Garmin developer account and app review — a separate step from the npm/GitHub release.
+Publishing to the Connect IQ Store requires a Garmin developer account and app review. See [STORE-LISTING.md](STORE-LISTING.md) for the full submission checklist.
 
 See also: [docs/WEB-MCP.md](../docs/WEB-MCP.md), [README.md](../README.md).
