@@ -33,30 +33,22 @@ After sideloading, open **Garmin Connect Mobile** → your device → **Connect 
 | Setting | Value |
 |---------|-------|
 | **Server URL** | Your tunnel URL, e.g. `https://abc.trycloudflare.com` (no trailing slash) |
-| **API Key** | Your `GARMIN_MCP_API_KEY` from `.env` |
 
-Sync your watch after saving settings.
+Sync the watch. On first open the widget will display a pairing code — approve it in the dashboard to complete setup. No manual API key entry required.
 
 ## Build and sideload
 
 **Quick build** (uses active SDK from Garmin Connect IQ SDK Manager):
 
 ```powershell
-cd "C:\Users\zsadi\Desktop\#Garmin\ciq"
+cd <path-to-garmin-bud>\ciq
 .\build.ps1
 # Default device: fenix847mm (Fenix 8 47mm)
-```
-
-**SDK location on this machine:**
-
-```
-C:\Users\zsadi\AppData\Roaming\Garmin\ConnectIQ\Sdks\connectiq-sdk-win-9.2.0-2026-06-09-92a1605b2\bin\
 ```
 
 **Manual build:**
 
 ```powershell
-$SdkBin = "$env:APPDATA\Garmin\ConnectIQ\Sdks\connectiq-sdk-win-9.2.0-2026-06-09-92a1605b2\bin"
 monkeyc -f monkey.jungle -o bin/GarminBud.prg -y developer_key.der -d fenix847mm -w
 ```
 

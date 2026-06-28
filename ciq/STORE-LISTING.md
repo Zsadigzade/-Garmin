@@ -16,39 +16,44 @@ Health & Fitness → Widget
 
 ## Short description
 
-Your Garmin Connect summary on your wrist — recovery, sleep, activity, stress, VO2 max, and heart rate.
+Your Garmin Connect data and Claude AI on your wrist — recovery, sleep, activity, stress, VO2 max, and more.
 
 ## Full description
 
-GarminBud shows your Garmin Connect data directly on your Garmin watch.
+GarminBud shows your Garmin Connect data directly on your watch — and lets you ask Claude AI questions about your health, right from your wrist.
 
-Open the widget to see a compact daily overview, then swipe or tap through cards for:
+Open the widget for a compact daily overview, then swipe or tap through 9 cards:
+• Daily overview — recovery, sleep, stress, VO2 max at a glance
+• Recovery — score with color-coded progress ring
+• Sleep — hours and quality score
+• Activity — latest workout with duration, distance, and avg heart rate
+• Stress — daily average
+• VO2 max — value and trend
+• Heart rate — resting HR and max
+• AI Insight — a daily one-line tip from Claude based on your health data
+• Ask AI — pick from preset questions and get a response from Claude on your watch
 
-- Daily overview
-- Recovery score with visual progress ring
-- Sleep duration and quality
-- Latest activity with duration, distance, and average heart rate
-- Stress average
-- VO2 max and trend
-- Resting and max heart rate
+Color-coded values make your status easy to scan. If your server is temporarily unreachable, the widget shows your last cached summary.
 
-Color-coded values make it easy to scan your status at a glance. If your server is temporarily unreachable, the widget shows your last cached summary.
+SETUP REQUIRED
+GarminBud connects to your own self-hosted server (free, open source):
+1. Install garmin-bud on your PC or Mac
+2. Run: garmin-bud serve
+3. Expose it over HTTPS (e.g. Cloudflare Tunnel)
+4. In Garmin Connect → Connect IQ → GarminBud settings, enter your HTTPS tunnel URL
+5. Open the dashboard link printed by the server — pair your watch with one tap and optionally add your Anthropic API key to unlock AI features
 
-**Setup required:** GarminBud connects to your own self-hosted GarminBud server. Install the free open-source `garmin-bud` project on your PC or Mac, run `garmin-bud serve`, expose it over HTTPS with a tunnel such as Cloudflare Tunnel, then enter your tunnel URL and API key in the Connect IQ app settings.
+No API key required for health data. Claude AI features require a free Anthropic account (bring your own key).
 
-GarminBud does not run AI on your watch. It displays a compact summary from your local server, which reads data from Garmin Connect on your behalf.
+GarminBud does not run AI on your watch. It sends your prompt to your local server, which calls Claude on your behalf and returns the response.
 
-Project home: https://github.com/Zsadigzade/garmin-bud
+Unofficial community project — not affiliated with Garmin Ltd.
+
+Setup guide: https://github.com/Zsadigzade/garmin-bud
 
 ## Privacy policy URL
 
-Publish `docs/PRIVACY-POLICY.md` to GitHub Pages or your project site, then use that public URL in the store listing.
-
-Suggested URL after publishing:
-
-`https://zsadigzade.github.io/garmin-bud/privacy-policy`
-
-Until published, the source file is included in the repository at `docs/PRIVACY-POLICY.md`.
+`https://github.com/Zsadigzade/Garmin-Bud/blob/main/docs/PRIVACY-POLICY.md`
 
 ## Required assets
 
@@ -62,9 +67,8 @@ Until published, the source file is included in the repository at `docs/PRIVACY-
 
 1. Create a Garmin developer account at https://developer.garmin.com
 2. Sign the Connect IQ developer agreement
-3. Create a new app in the developer portal
-4. Replace the placeholder UUID in `ciq/manifest.xml` with the UUID assigned by Garmin
-5. Build a release binary:
+3. App registered at https://apps.garmin.com/apps/4275741b-c52a-4b44-951e-bb2af99b6148
+4. Build a release binary:
 
 ```powershell
 cd ciq
@@ -78,9 +82,10 @@ monkeyc -f monkey.jungle -o bin/GarminBud.prg -y developer_key.der -d all -w
 
 ## Review notes for Garmin
 
-- The app requires user-provided Server URL and API Key settings
+- The app requires a user-provided Server URL in Connect IQ settings; the API key is obtained automatically via an on-watch pairing flow (no manual entry)
 - The widget only calls the user-configured HTTPS endpoint
 - No Garmin Connect credentials are stored on the watch
+- Claude AI features require the user to supply their own Anthropic API key via the companion web dashboard; AI is optional
 - Only the Communications permission is used
 - The companion server is open source and user-hosted
 
@@ -91,11 +96,12 @@ See `ciq/manifest.xml` for the current product list, including Forerunner 70 (`f
 ## Setup summary for users
 
 1. Install and configure `garmin-bud` on a computer
-2. Run `garmin-bud serve`
-3. Start an HTTPS tunnel to port 3847
+2. Run `garmin-bud serve` (or `.\scripts\start-watch-stack.ps1` to also start the tunnel)
+3. Start an HTTPS tunnel to port 3847 (Cloudflare Tunnel recommended)
 4. In Garmin Connect Mobile → Connect IQ → GarminBud settings:
-   - **Server URL:** your HTTPS tunnel URL
-   - **API Key:** your `GARMIN_MCP_API_KEY`
-5. Sync the watch and add the widget to your widget loop
+   - **Server URL:** your HTTPS tunnel URL (only field required)
+5. Open the dashboard URL printed by the server — approve the pairing code shown on the watch
+6. Optionally add an Anthropic API key in the dashboard to enable AI features
+7. Sync the watch and add the widget to your widget loop
 
 See also: [ciq/README.md](README.md), [docs/WEB-MCP.md](../docs/WEB-MCP.md)

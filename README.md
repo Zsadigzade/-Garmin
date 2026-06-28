@@ -95,7 +95,7 @@ View recovery, sleep, activity, stress, and VO2 max on your Garmin watch via a C
 2. Build and sideload the widget — see [ciq/README.md](./ciq/README.md)
 3. In **Garmin Connect Mobile** → Connect IQ → GarminBud settings, set:
    - **Server URL** — your tunnel URL (e.g. `https://abc.trycloudflare.com`)
-   - **API Key** — your `GARMIN_MCP_API_KEY` from `.env`
+4. Open the widget on your watch — it shows a pairing code. Approve it in the dashboard (`/dashboard?token=YOUR_API_KEY`) to complete setup.
 
 Tap the widget to cycle through data cards. The watch calls `GET /api/watch` — a compact JSON summary, not the full MCP protocol.
 
